@@ -3,25 +3,37 @@ import { Insert } from "../screens/Insert";
 import { Search } from "../screens/Search";
 import { NavigationContainer } from "@react-navigation/native";
 import { Text, View } from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { theme } from "../styledComponents/theme";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Family } from "../screens/Family";
 
-function HomeScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Home!</Text>
-    </View>
-  );
-}
+export type RootStackParamList = {
+  Family: { objFirstSearch: { [key: string]: any } };
+  Procurar: undefined;
+};
 
-function SettingsScreen() {
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function SearchStack() {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Settings!</Text>
-    </View>
+    <Stack.Navigator
+      initialRouteName="Procurar"
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.primary },
+        headerShadowVisible: false,
+        // headerTransparent: true
+      }}
+    >
+      <Stack.Screen name="Procurar" component={Search} />
+      <Stack.Screen name="Family" component={Family} />
+    </Stack.Navigator>
   );
 }
 export type RootDrawerParamList = {
-  Insert: undefined;
-  Search: undefined;
+  Inserir: undefined;
+  Procurar: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootDrawerParamList>();
@@ -32,10 +44,31 @@ export default function Router() {
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
+          // tabBarActiveTintColor: theme.colors.primary,
         }}
       >
-        <Tab.Screen name="Insert" component={Insert} />
-        <Tab.Screen name="Search" component={Search} />
+        <Tab.Screen
+          name="Procurar"
+          component={SearchStack}
+          options={{
+            tabBarIcon: ({ size, color }) => (
+              <AntDesign name="search1" size={size} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Inserir"
+          component={Insert}
+          options={{
+            tabBarIcon: ({ size, color }) => (
+              <MaterialIcons
+                name="insert-chart-outlined"
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );

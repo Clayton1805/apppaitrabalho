@@ -8,6 +8,7 @@ export type colors = {
   transparent: string;
   black: string;
   green: string;
+  gray: string;
 };
 export type spaces = {
   header: number;
@@ -37,6 +38,7 @@ export const theme: DefaultTheme = {
   colors: {
     primary: "#335f88",
     secondary: "#FFFFFF",
+    gray: "#f8f8fb",
     error: "#ED4337",
     transparent: "transparent",
     black: "black",

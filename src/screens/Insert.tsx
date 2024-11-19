@@ -1,47 +1,40 @@
-// import { StackScreenProps } from "@react-navigation/stack";
-import { Text, Button, TextInput, TouchableOpacity, View } from "react-native";
-// import { RootStackLoginParamList } from "../routes/stackLogin.routes";
+import { View } from "react-native";
 import { Input } from "../styledComponents/utils/Input.styled";
 import { ScrollContainerScreen } from "../styledComponents/utils/ScrollContainerScreen.styled";
-// import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-// import { zodResolver } from "@hookform/resolvers/zod";
-import { ContainerScreen } from "../styledComponents/utils/ContainerScreen.styled";
-// import { storage } from "../storageDevice/MMKV";
-import { LogoAppLogin } from "../styledComponents/components/LogoAppLogin.styled";
 import { TextStyled } from "../styledComponents/utils/TextStyled.styled";
 import { ContainerStyled } from "../styledComponents/utils/ContainerStyled.styled";
-import { InputLogin } from "../styledComponents/screens/Login/InputLogin.styled";
 import { ButtonStyled } from "../styledComponents/components/ButtonStyled.styled";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { useEffect, useState } from "react";
-import { ContainerLoginStyled } from "../styledComponents/screens/Login/ContainerLoginStyled.styled";
-import { TouchableOpacityLoginStyled } from "../styledComponents/screens/Login/TouchableOpacityLoginStyled.styled";
 import axios from "axios";
 import { URL, PASSWORD } from "@env";
+import { useSheetNameStore } from "../store/useSheetNameStore";
+import { useObjFormStore } from "../store/useObjFormStore";
+import { useHeadersStore } from "../store/useHeadersStore";
 
 export function Insert() {
-  const [headers, setHeaders] = useState([]);
-  const [sheetName, setSheetName] = useState("Visita");
-
-  const getHeaders = () => {
-    axios
-      .get(`${URL}?password=${PASSWORD}&returnHeaders=1&nameSheet=${sheetName}`)
-      .then(({ data: { headers } }) => {
-        console.log("OOOOIIIIIIIII24", headers);
-        setHeaders(headers);
-      })
-      .catch(() => {
-        console.log("DEU RUIM2");
-      });
-  };
+  const { headers, setHeaders } = useHeadersStore();
+  const { sheetName, setSheetName } = useSheetNameStore();
+  const { objForm, setObjForm } = useObjFormStore();
+  const [retorno, setRetorno] = useState("");
 
   useEffect(() => getHeaders(), [sheetName]);
-  // useEffect(() => getHeaders(), []);
+  useEffect(() => console.log("objForm", objForm), [objForm]);
 
-  const [objForm, setObjForm] = useState<{ [key: string]: string }>({});
-
-  const [retorno, setRetorno] = useState("");
+  const getHeaders = () => {
+    if (headers[sheetName].length === 0) {
+      axios
+        .get(
+          `${URL}?password=${PASSWORD}&returnHeaders=1&nameSheet=${sheetName}`
+        )
+        .then(({ data }) => {
+          console.log("OOOOIIIIIIIII24", headers);
+          setHeaders({ ...headers, [sheetName]: data.headers });
+        })
+        .catch(() => {
+          console.log("DEU RUIM2");
+        });
+    }
+  };
 
   const postFormHandleSubmit = () => {
     const url = Object.keys(objForm).reduce(
@@ -65,7 +58,7 @@ export function Insert() {
           title={"Visita"}
           widthPercentage={35}
           onPress={() => {
-            setHeaders([]);
+            // setHeaders([]);
             setRetorno("");
             setSheetName("Visita");
           }}
@@ -78,7 +71,7 @@ export function Insert() {
           title={"Pessoa"}
           widthPercentage={35}
           onPress={() => {
-            setHeaders([]);
+            // setHeaders([]);
             setRetorno("");
             setSheetName("Pessoa");
           }}
@@ -94,7 +87,7 @@ export function Insert() {
         alignItemsCenter={false}
       >
         {/* <TextStyled fontSize={"large"}>{sheetName}</TextStyled> */}
-        {headers.map((header) => (
+        {headers[sheetName].map((header) => (
           <View key={header}>
             <TextStyled marginTop={3}>{header + ":"}</TextStyled>
             <Input
