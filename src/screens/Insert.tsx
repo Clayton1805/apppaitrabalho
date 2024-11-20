@@ -6,10 +6,11 @@ import { ContainerStyled } from "../styledComponents/utils/ContainerStyled.style
 import { ButtonStyled } from "../styledComponents/components/ButtonStyled.styled";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { URL, PASSWORD } from "@env";
+import { URL, PASSWORD } from "../utils/objEnv";
 import { useSheetNameStore } from "../store/useSheetNameStore";
 import { useObjFormStore } from "../store/useObjFormStore";
 import { useHeadersStore } from "../store/useHeadersStore";
+import { formattedDate } from "../utils/formattedDate";
 
 export function Insert() {
   const { headers, setHeaders } = useHeadersStore();
@@ -49,14 +50,15 @@ export function Insert() {
         setRetorno(OK);
       })
       .catch(() => console.log("DEU RUIM"));
+    setObjForm({});
   };
 
   return (
     <ScrollContainerScreen>
       <ContainerStyled marginTop={10} directionRow justifyContentCenter>
         <ButtonStyled
-          title={"Visita"}
-          widthPercentage={35}
+          title={"VISITA"}
+          widthPercentage={45}
           onPress={() => {
             // setHeaders([]);
             setRetorno("");
@@ -68,8 +70,8 @@ export function Insert() {
           color={sheetName === "Visita" ? "black" : "secondary"}
         />
         <ButtonStyled
-          title={"Pessoa"}
-          widthPercentage={35}
+          title={"CADASTRAR"}
+          widthPercentage={45}
           onPress={() => {
             // setHeaders([]);
             setRetorno("");
@@ -95,7 +97,11 @@ export function Insert() {
               onChangeText={(text) =>
                 setObjForm({ ...objForm, [header]: text })
               }
-              value={objForm[header]}
+              value={
+                header === "DATA"
+                  ? objForm[header] ?? formattedDate(new Date())
+                  : objForm[header]
+              }
             />
           </View>
         ))}

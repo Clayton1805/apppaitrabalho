@@ -20,7 +20,7 @@ import { TouchableOpacityLoginStyled } from "../styledComponents/screens/Login/T
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import styled from "styled-components/native";
-import { URL, PASSWORD } from "@env";
+import { URL, PASSWORD } from "../utils/objEnv";
 import { DisplaySearchValues } from "../components/DisplaySearchValues";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { RootDrawerParamList, RootStackParamList } from "../routes";

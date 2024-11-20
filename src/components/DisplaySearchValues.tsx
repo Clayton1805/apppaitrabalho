@@ -4,7 +4,7 @@ import { TextStyled } from "../styledComponents/utils/TextStyled.styled";
 import { Button, TouchableOpacity, View } from "react-native";
 import { TouchableOpacityStyled } from "../styledComponents/utils/TouchableOpacityStyled.styled";
 import axios from "axios";
-import { URL, PASSWORD } from "@env";
+import { URL, PASSWORD } from "../utils/objEnv";
 import { formattedDate } from "../utils/formattedDate";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { RootDrawerParamList, RootStackParamList } from "../routes";
@@ -47,11 +47,11 @@ export function DisplaySearchValues({
   const [visitesIsVisible, setVisitesIsVisible] = useState(false);
   let searchValuesKeys = Object.keys(obj);
   if (!allValues) {
-    searchValuesKeys = searchValuesKeys.slice(0, 4);
+    searchValuesKeys = searchValuesKeys.slice(0, 5);
   }
 
   const searchVisites = () => {
-    if (visites.length === 0) {
+    if (!visitesIsVisible) {
       axios
         .get(
           `${URL}?password=${PASSWORD}&nameSheet=Visita&field=CRA&value=${obj.CRA}`
@@ -84,24 +84,28 @@ export function DisplaySearchValues({
           <TouchableOpacity
             activeOpacity={0.6}
             onPress={() => {
-              if (family) {
-                navigation.navigate("Family", { objFirstSearch: obj });
-              } else {
-                setAllValues(!allValues);
-              }
+              setAllValues(!allValues);
             }}
             style={{ zIndex: 100 }}
           >
-            {family ? (
-              <MaterialIcons name="family-restroom" size={24} color="black" />
-            ) : (
-              <AntDesign
-                name={allValues ? "eye" : "eyeo"}
-                size={24}
-                color="black"
-              />
-            )}
+            <AntDesign
+              name={allValues ? "eye" : "eyeo"}
+              size={24}
+              color="black"
+            />
           </TouchableOpacity>
+          {family && (
+            <TouchableOpacityStyled
+              activeOpacity={0.6}
+              onPress={() => {
+                navigation.navigate("Family", { objFirstSearch: obj });
+              }}
+              style={{ zIndex: 100 }}
+              marginTop={8}
+            >
+              <MaterialIcons name="family-restroom" size={24} color="black" />
+            </TouchableOpacityStyled>
+          )}
         </View>
       </View>
       {searchValuesKeys.map((key, index) => (
@@ -110,11 +114,15 @@ export function DisplaySearchValues({
           alignItemsCenter={false}
           widthPercentage={95}
         >
-          <TextStyled marginTop={3} color="black" fontSize={"span"}>
-            {key + ":"}
-          </TextStyled>
+          {key !== "DIAGNÓSTICO" && (
+            <TextStyled marginTop={3} color="black" fontSize={"span"}>
+              {key + ":"}
+            </TextStyled>
+          )}
           <TextStyled marginTop={3} color="black" selectable>
-            {obj[key]}
+            {key === "Aniversário"
+              ? formattedDate(new Date(obj[key]))
+              : obj[key]}
           </TextStyled>
         </ContainerStyled>
       ))}
@@ -134,7 +142,7 @@ export function DisplaySearchValues({
           marginBottom={4}
           directionRow
         >
-          <TextStyled color="black">Adicionar Visita </TextStyled>
+          <TextStyled color="black">VISITA DOMICILIAR </TextStyled>
           <AntDesign name="arrowright" size={20} color="black" />
         </TouchableOpacityStyled>
       </ContainerStyled>
@@ -149,7 +157,7 @@ export function DisplaySearchValues({
           }}
           directionRow
         >
-          <TextStyled color="black">Visitas </TextStyled>
+          <TextStyled color="black">VISITAS ANTERIORES </TextStyled>
           <FontAwesome
             name={visitesIsVisible ? "angle-double-up" : "angle-double-down"}
             size={20}
@@ -158,24 +166,30 @@ export function DisplaySearchValues({
         </TouchableOpacityStyled>
       </ContainerStyled>
       {visitesIsVisible &&
-        visites.map(({ CRA, DATA, OBSERVAÇÃO }, index) => {
-          const data = new Date(DATA);
-          return (
-            <ContainerStyled
-              key={CRA + index + "Visites"}
-              alignItemsCenter={false}
-              widthPercentage={95}
-              marginBottom={10}
-            >
-              <TextStyled marginTop={3} color="black" fontSize={"span"}>
-                {formattedDate(data)}
-              </TextStyled>
-              <TextStyled marginTop={3} color="black" selectable>
-                {OBSERVAÇÃO}
-              </TextStyled>
-            </ContainerStyled>
-          );
-        })}
+        visites
+          .sort((a, b) => {
+            const dateA: any = new Date(a.DATA);
+            const dateB: any = new Date(b.DATA);
+            return dateB - dateA;
+          })
+          .map(({ CRA, DATA, OBSERVAÇÃO }, index) => {
+            const data = new Date(DATA);
+            return (
+              <ContainerStyled
+                key={CRA + index + "Visites"}
+                alignItemsCenter={false}
+                widthPercentage={95}
+                marginBottom={10}
+              >
+                <TextStyled marginTop={3} color="black" fontSize={"span"}>
+                  {formattedDate(data)}
+                </TextStyled>
+                <TextStyled marginTop={3} color="black" selectable>
+                  {OBSERVAÇÃO}
+                </TextStyled>
+              </ContainerStyled>
+            );
+          })}
     </ContainerStyled>
   );
 }

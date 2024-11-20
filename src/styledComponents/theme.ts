@@ -36,7 +36,7 @@ declare module "styled-components/native" {
 
 export const theme: DefaultTheme = {
   colors: {
-    primary: "#335f88",
+    primary: "#93c57d",
     secondary: "#FFFFFF",
     gray: "#f8f8fb",
     error: "#ED4337",

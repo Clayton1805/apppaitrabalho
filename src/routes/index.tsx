@@ -11,7 +11,7 @@ import { Family } from "../screens/Family";
 
 export type RootStackParamList = {
   Family: { objFirstSearch: { [key: string]: any } };
-  Procurar: undefined;
+  ProcurarStack: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -19,14 +19,15 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function SearchStack() {
   return (
     <Stack.Navigator
-      initialRouteName="Procurar"
+      initialRouteName="ProcurarStack"
       screenOptions={{
         headerStyle: { backgroundColor: theme.colors.primary },
         headerShadowVisible: false,
         // headerTransparent: true
+        // headerLargeTitleStyle: { fontSize: 5 },
       }}
     >
-      <Stack.Screen name="Procurar" component={Search} />
+      <Stack.Screen name="ProcurarStack" component={Search} />
       <Stack.Screen name="Family" component={Family} />
     </Stack.Navigator>
   );

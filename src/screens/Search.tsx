@@ -20,13 +20,15 @@ import { TouchableOpacityLoginStyled } from "../styledComponents/screens/Login/T
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 import styled from "styled-components/native";
-import { URL, PASSWORD } from "@env";
+import { URL, PASSWORD } from "../utils/objEnv";
 import { DisplaySearchValues } from "../components/DisplaySearchValues";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { RootDrawerParamList, RootStackParamList } from "../routes";
 import { useHeadersStore } from "../store/useHeadersStore";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CompositeScreenProps } from "@react-navigation/native";
+import { theme } from "../styledComponents/theme";
+import { TouchableOpacityStyled } from "../styledComponents/utils/TouchableOpacityStyled.styled";
 
 const DropdownStyled = styled(Dropdown)<any>`
   height: 40px;
@@ -45,48 +47,75 @@ type Props = CompositeScreenProps<
 >;
 
 export function Search({ navigation }: Props) {
-  const { headers, setHeaders } = useHeadersStore();
+  // const { headers, setHeaders } = useHeadersStore();
 
   const [searchValues, setSearchValues] = useState<{ [key: string]: any }[]>(
     []
   );
   const [dropdown, setDropdown] = useState(null);
+  const [dropdown2, setDropdown2] = useState<string | null>(null);
   const [valor, setValor] = useState("");
+  const [valor2, setValor2] = useState("");
+  const [secondFilterIsVisible, setSecondFilterIsVisible] = useState(false);
 
-  const getHeaders = () => {
-    console.log("headers", headers);
-    if (headers.Pessoa.length === 0) {
+  // const getHeaders = () => {
+  //   console.log("headers", headers);
+  //   if (headers.Pessoa.length === 0) {
+  //     axios
+  //       .get(`${URL}?password=${PASSWORD}&returnHeaders=1&nameSheet=Pessoa`)
+  //       .then(({ data }) => {
+  //         console.log("OOOOIIIIIIIII24", headers);
+  //         setHeaders({
+  //           ...headers,
+  //           Pessoa: data.headers,
+  //         });
+  //       })
+  //       .catch(() => {
+  //         console.log("DEU RUIM2");
+  //       });
+  //   }
+  // };
+  const search = () => {
+    if (
+      searchValues.length !== 0 &&
+      valor2 !== "" &&
+      dropdown2 &&
+      dropdown2 !== ""
+    ) {
+      setSearchValues(
+        searchValues.filter((objSearchValues) =>
+          `${objSearchValues[dropdown2]}`.startsWith(valor2)
+        )
+      );
+    } else {
       axios
-        .get(`${URL}?password=${PASSWORD}&returnHeaders=1&nameSheet=Pessoa`)
-        .then(({ data }) => {
-          console.log("OOOOIIIIIIIII24", headers);
-          setHeaders({
-            ...headers,
-            Pessoa: data.headers,
-          });
-        })
+        .get(
+          `${URL}?password=${PASSWORD}&nameSheet=Pessoa&field=${dropdown}&value=${valor}&strongSearch=${
+            dropdown === "CRA" ? 1 : 0
+          }`
+        )
+        .then(
+          ({
+            data: { data },
+          }: {
+            data: { data: { [key: string]: any }[] };
+          }) => {
+            console.log("OOOOIIIIIIIII24 search data", data);
+            if (valor2 !== "" && dropdown2 && dropdown2 !== "") {
+              data = data.filter((objSearchValues) =>
+                `${objSearchValues[dropdown2]}`.startsWith(valor2)
+              );
+            }
+            setSearchValues(data);
+          }
+        )
         .catch(() => {
-          console.log("DEU RUIM2");
+          console.log("DEU RUIM2 search");
         });
     }
   };
-  const search = () => {
-    axios
-      .get(
-        `${URL}?password=${PASSWORD}&nameSheet=Pessoa&field=${dropdown}&value=${valor}&strongSearch=${
-          dropdown === "CRA" ? 1 : 0
-        }`
-      )
-      .then(({ data: { data } }) => {
-        console.log("OOOOIIIIIIIII24 search data", data);
-        setSearchValues(data);
-      })
-      .catch(() => {
-        console.log("DEU RUIM2 search");
-      });
-  };
 
-  useEffect(() => getHeaders(), []);
+  // useEffect(() => getHeaders(), []);
   useEffect(() => console.log("dropdown", dropdown), [dropdown]);
 
   return (
@@ -96,13 +125,14 @@ export function Search({ navigation }: Props) {
         widthPercentage={95}
         alignItemsCenter={false}
       >
-        <TextStyled marginTop={3}>Campo:</TextStyled>
+        <TextStyled marginTop={3}>Pesquisar por:</TextStyled>
         <DropdownStyled
-          placeholder={"placeholder"}
-          placeholderStyle={{ color: "#9e9e9e", fontSize: 14 }}
+          placeholder={""}
           labelField={"header"}
           valueField={"header"}
-          data={headers.Pessoa.map((header: string) => ({ header }))}
+          data={["CRA", "Nome", "Endereço", "Número", "DIAGNÓSTICO"].map(
+            (header: string) => ({ header })
+          )}
           onChange={(obj: any) => {
             console.log("OBJ", obj);
             setDropdown(obj.header);
@@ -110,19 +140,58 @@ export function Search({ navigation }: Props) {
           value={dropdown}
           autoScroll={false}
         />
-        <TextStyled marginTop={3}>Valor:</TextStyled>
+        <TextStyled marginTop={3}>DADO:</TextStyled>
         <Input
           widthPercentage={100}
           onChangeText={(text) => setValor(text)}
           value={valor}
         />
-        {/* <TextStyled fontSize={"large"}>{sheetName}</TextStyled> */}
+        {secondFilterIsVisible && (
+          <>
+            <TextStyled marginTop={3}>Pesquisar por:</TextStyled>
+            <DropdownStyled
+              placeholder={""}
+              labelField={"header"}
+              valueField={"header"}
+              data={["CRA", "Nome", "Endereço", "Número", "DIAGNÓSTICO"].map(
+                (header: string) => ({ header })
+              )}
+              onChange={(obj: any) => {
+                console.log("OBJ2", obj);
+                setDropdown2(obj.header);
+              }}
+              value={dropdown2}
+              autoScroll={false}
+            />
+            <TextStyled marginTop={3}>DADO:</TextStyled>
+            <Input
+              widthPercentage={100}
+              onChangeText={(text) => setValor2(text)}
+              value={valor2}
+            />
+          </>
+        )}
+        <TouchableOpacityStyled
+          activeOpacity={0.6}
+          onPress={() => {
+            setSecondFilterIsVisible(!secondFilterIsVisible);
+          }}
+          marginTop={2}
+          marginRight={7}
+          flexEnd
+        >
+          <AntDesign
+            name={secondFilterIsVisible ? "pluscircle" : "pluscircleo"}
+            size={24}
+            color={theme.colors.secondary}
+          />
+        </TouchableOpacityStyled>
       </ContainerStyled>
       <ButtonStyled
         title={"Pesquisar"}
         onPress={() => search()}
         widthPercentage={35}
-        marginTop={10}
+        marginTop={0}
         marginBottom={20}
       />
       {searchValues.map((obj, index) => (
